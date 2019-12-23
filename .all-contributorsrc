@@ -1,0 +1,24 @@
+{
+  "projectName": "adlapi.js",
+  "projectOwner": "AbstractList",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "commitConvention": "none",
+  "contributors": [
+    {
+      "login": "diced-tomato",
+      "name": "dicedtomato",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/35403473?v=4",
+      "profile": "http://ur mum",
+      "contributions": [
+        "code"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7
+}
