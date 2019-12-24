@@ -2,9 +2,9 @@ import { EventEmitter } from 'events';
 import fetch from 'node-fetch';
 
 interface UniversalOptions {
-  users: Function;
-  guilds: Function;
-  shards?: Function;
+  users: () => number;
+  guilds: () => number;
+  shards?: () => number;
 }
 
 interface OptionsLayout {
@@ -44,6 +44,27 @@ export default class ADLAPI extends EventEmitter {
     if (!this.options.universal.guilds) throw new Error('Universal guilds function needs to be specified!');
     if (!this.checkUniversal()) throw new Error('Universal functions did not return a Number!');
   }
+  /**
+   * Posts your bots stats to ADL API
+   */
+  public async postStats() {
+    if (!this.checkUniversal()) throw new Error('Universal Functions do not return a Number.');
+
+    const data = {
+      servers: this.getGuilds(),
+      users: this.getUsers(),
+    };
+
+    if (this.options.universal.shards) {
+      // @ts-ignore
+      data.shards = this.getShards();
+    }
+    const json = await this.request(`/bot/${this.id}/stats`, 'POST', data);
+
+    this.emit('posted', json);
+    return json;
+  }
+
   private checkUniversal() {
     const guilds = typeof this.getGuilds() === 'number';
     const users = typeof this.getUsers() === 'number';
@@ -71,12 +92,12 @@ export default class ADLAPI extends EventEmitter {
     // Need a way to make like on get request to make data to query
     // Else keep the data in the body
     const res = await fetch('https://abstractlist.net/api' + endpoint, {
+      body: !data ? undefined : JSON.stringify(data),
       headers: {
-        'Content-Type': 'application/json',
         Authorization: `${this.token}`,
+        'Content-Type': 'application/json',
       },
       method,
-      body: !data ? undefined : JSON.stringify(data),
     });
 
     // it will check if its 200 or not
@@ -85,27 +106,6 @@ export default class ADLAPI extends EventEmitter {
 
     if (!res.ok) this.emit('error', json);
 
-    return json;
-  }
-
-  /**
-   * Posts your bots stats to ADL API
-   */
-  public async postStats() {
-    if (!this.checkUniversal()) throw new Error('Universal Functions do not return a Number.');
-
-    const data = {
-      users: this.getUsers(),
-      servers: this.getGuilds(),
-    };
-
-    if (this.options.universal.shards) {
-      // @ts-ignore
-      data.shards = this.getShards();
-    }
-    const json = await this.request(`/bot/${this.id}/stats`, 'POST', data);
-
-    this.emit('posted', json);
     return json;
   }
 }
